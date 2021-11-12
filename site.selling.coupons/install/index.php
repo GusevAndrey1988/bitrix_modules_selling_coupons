@@ -55,8 +55,30 @@ class site_selling_coupons extends \CModule
         );
     }
 
+    public function InstallDB()
+    {
+        /** @global \CDatabase $DB 
+         *  @global \CMain $APPLICATION
+         */
+        global $DB, $APPLICATION;
+
+        if (!$DB->RunSQLBatch(__DIR__ . '/db/mysql/install.sql'))
+        {
+            $APPLICATION->ThrowException(Loc::getMessage('SITE_COUPON_MODULE_CREATE_TABLE_ERROR'));
+        }
+    }
+
+    public function UnInstallDB()
+    {
+        /** @global \CDatabase $DB */
+        global $DB;
+
+        $DB->RunSQLBatch(__DIR__ . '/db/mysql/uninstall.sql');
+    }
+
     public function DoInstall()
     {
+        $this->InstallDB();
         $this->InstallEvents();
 
         RegisterModule('site.selling.coupons');
@@ -64,6 +86,7 @@ class site_selling_coupons extends \CModule
 
     public function DoUninstall()
     {
+        $this->UnInstallDB();
         $this->UnInstallEvents();
         
         UnRegisterModule('site.selling.coupons');
