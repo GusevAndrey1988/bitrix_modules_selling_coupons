@@ -40,6 +40,14 @@ class site_selling_coupons extends \CModule
             \Site\SellingCoupons\CustomProperties\DiscountProperty::class,
             'GetUserTypeDescription'
         );
+
+        $eventManager->registerEventHandler(
+            'sale',
+            '\Bitrix\Sale\Internals\DiscountCoupon::onBeforeDelete',
+            $this->MODULE_ID,
+            \Site\SellingCoupons\EventsHandlers\CouponHandler::class,
+            'onBeforeDelete'
+        );
     }
 
     public function UnInstallEvents()
@@ -52,6 +60,14 @@ class site_selling_coupons extends \CModule
             $this->MODULE_ID,
             \Site\SellingCoupons\CustomProperties\DiscountProperty::class,
             'GetUserTypeDescription'
+        );
+
+        $eventManager->unRegisterEventHandler(
+            'sale',
+            '\Bitrix\Sale\Internals\DiscountCoupon::onBeforeDelete',
+            $this->MODULE_ID,
+            \Site\SellingCoupons\EventsHandlers\CouponHandler::class,
+            'onBeforeDelete'
         );
     }
 
@@ -76,18 +92,34 @@ class site_selling_coupons extends \CModule
         $DB->RunSQLBatch(__DIR__ . '/db/mysql/uninstall.sql');
     }
 
+    public function InstallFiles()
+    {
+        $documentRoot = \Bitrix\Main\Application::getDocumentRoot();
+
+        CopyDirFiles(__DIR__ . '/admin', $documentRoot . '/bitrix/admin');
+    }
+
+    public function UnInstallFiles()
+    {
+        $documentRoot = \Bitrix\Main\Application::getDocumentRoot();
+
+        DeleteDirFiles(__DIR__ . '/admin', $documentRoot . '/bitrix/admin');
+    }
+
     public function DoInstall()
     {
         $this->InstallDB();
         $this->InstallEvents();
+        $this->InstallFiles();
 
         RegisterModule('site.selling.coupons');
     }
 
     public function DoUninstall()
     {
-        $this->UnInstallDB();
+        $this->UnInstallFiles();
         $this->UnInstallEvents();
+        $this->UnInstallDB();
         
         UnRegisterModule('site.selling.coupons');
     }
