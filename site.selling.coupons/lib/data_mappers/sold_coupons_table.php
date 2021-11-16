@@ -1,6 +1,6 @@
 <?php
 
-namespace Site\SellingCoupons;
+namespace Site\SellingCoupons\DataMappers;
 
 use Bitrix\Main\ORM\Fields\IntegerField;
 use Bitrix\Main\ORM\Fields\Relations\Reference;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Site\SellingCoupons;
+namespace Site\SellingCoupons\DataMappers;
 
 class SoldCouponCollection extends EO_SoldCoupons_Collection
 {

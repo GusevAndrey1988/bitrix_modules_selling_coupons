@@ -39,9 +39,48 @@ use Bitrix\Main\Loader;
         && $request->get('Update') !== '' 
         && check_bitrix_sessid()
     ) {
-        // TODO: Сохранение параметров
-        Config\Option::set($module_id, 'iblock_id', $request->get('iblock'));
-        Config\Option::set($module_id, 'property_code', $request->get('iblock-discount-property'));
+        $propertyCode = $request->get('iblock-discount-property');
+        if ($propertyCode)
+        {
+            Config\Option::set($module_id, 'property_code', $propertyCode);
+        }
+        else
+        {
+            \CAdminMessage::ShowMessage(Loc::getMessage('SITE_COUPON_CONFIG_PROPERTY_CODE_NOTSET'));
+        }
+
+        $iblockId = $request->get('iblock');
+        if ($iblockId && $iblockId !== '0')
+        {
+            $iblockPropertiesList = \Bitrix\Iblock\PropertyTable::getList([
+                'filter' => [
+                    '=IBLOCK_ID' => $iblockId,
+                ],
+            ])->fetchAll();
+
+            $propertyContained = false;
+            foreach ($iblockPropertiesList as $iblockProperty)
+            {
+                if ($iblockProperty['CODE'] === $propertyCode)
+                {
+                    $propertyContained = true;
+                    break;
+                }
+            }
+
+            if ($propertyContained)
+            {
+                Config\Option::set($module_id, 'iblock_id', $iblockId);
+            }
+            else
+            {
+                \CAdminMessage::ShowMessage(Loc::getMessage('SITE_COUPON_CONFIG_PROPERTY_NOT_CONTAINED'));
+            }
+        }
+        else
+        {
+            \CAdminMessage::ShowMessage(Loc::getMessage('SITE_COUPON_CONFIG_IBLOCK_NOTSET'));
+        }
     }
 
     $tabs = [
