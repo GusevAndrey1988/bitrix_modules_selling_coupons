@@ -50,8 +50,13 @@ use Bitrix\Main\Loader;
         }
 
         $iblockId = $request->get('iblock');
-        if ($iblockId && $iblockId !== '0')
+        if ($iblockId === '0')
         {
+            Config\Option::set($module_id, 'iblock_id', $iblockId);
+        }
+        else if ($iblockId)
+        {
+            $iblockId = intval($iblockId);
             $iblockPropertiesList = \Bitrix\Iblock\PropertyTable::getList([
                 'filter' => [
                     '=IBLOCK_ID' => $iblockId,
