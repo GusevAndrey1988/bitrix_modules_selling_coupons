@@ -58,7 +58,7 @@ if (!isset($order))
 	$order = 'ASC';
 }
 
-$couponsList = \Site\SellingCoupons\SoldCouponsTable::getList([
+$couponsList = \Site\SellingCoupons\DataMappers\SoldCouponsTable::getList([
 	'select' => [
 		'*',
 		'COUPON_CODE' => 'COUPON.COUPON',
@@ -111,7 +111,8 @@ $adminList->AddHeaders($headers);
 while ($coupon = $resultList->GetNext())
 {
 	$row = &$adminList->AddRow($coupon['ID'], $coupon);
-
+	
+	// TODO: Удаление записи о продаже
 	$actions = [
 		[
 			'ICON' => 'edit',
@@ -122,7 +123,7 @@ while ($coupon = $resultList->GetNext())
 		[
 			'ICON' => 'delete',
 			'TEXT' => Loc::getMessage('SITE_COUPON_LIST_COUPON_DELETE'),
-			'LINK' => 'javascript:if(confirm(\'Вы уверены, что хотите удалить купон?\')) 
+			'LINK' => 'javascript:if(confirm(\'' . Loc::getMessage('SITE_COUPON_LIST_COUPON_DELETE_CONFIRM') . '\')) 
 				top.window.location.href=\'/bitrix/admin/sale_discount_coupons.php?lang=' . LANGUAGE_ID
 				. '&ID=' . $coupon['COUPON_ID'] . '&action=delete&sessid=' . bitrix_sessid() . '\'',
 		]

@@ -119,7 +119,12 @@ class site_selling_coupons extends \CModule
     {
         $this->UnInstallFiles();
         $this->UnInstallEvents();
-        $this->UnInstallDB();
+
+        $request = \Bitrix\Main\Context::getCurrent()->getRequest();
+        if ($request->get('unistall_db'))
+        {
+            $this->UnInstallDB();
+        }
         
         UnRegisterModule('site.selling.coupons');
     }
