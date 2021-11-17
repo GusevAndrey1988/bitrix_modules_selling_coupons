@@ -9,3 +9,5 @@ $MESS['SITE_COUPON_LIST_COUPON_ACTIVE'] = 'Активность купона';
 $MESS['SITE_COUPON_LIST_COUPON_EDIT'] = 'Редактировать купон';
 $MESS['SITE_COUPON_LIST_COUPON_DELETE'] = 'Удалить купон';
 $MESS['SITE_COUPON_LIST_COUPON_DELETE_CONFIRM'] = 'Вы уверены, что хотите удалить купон?';
+
+$MESS['SITE_COUPON_LIST_COUPON_DELETE_ERR'] = 'Ошибка';

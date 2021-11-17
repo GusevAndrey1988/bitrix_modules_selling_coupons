@@ -19,30 +19,6 @@ class DeleteCouponAction extends \Bitrix\Main\Engine\Action
 
         if ($permission === 'W')
         {
-            // TODO: vvv
-            /* if (empty($discountList))
-				{
-					$couponIterator = Internals\DiscountCouponTable::getList(array(
-						'select' => array('ID', 'DISCOUNT_ID'),
-						'filter' => array('@ID' => $listID)
-					));
-					while ($coupon = $couponIterator->fetch())
-						$discountList[$coupon['DISCOUNT_ID']] = $coupon['DISCOUNT_ID'];
-				}
-				Internals\DiscountCouponTable::setDiscountCheckList($discountList);
-				Internals\DiscountCouponTable::disableCheckCouponsUse();
-				foreach ($listID as &$couponID)
-				{
-					$result = Internals\DiscountCouponTable::delete($couponID);
-					if (!$result->isSuccess())
-						$adminList->AddGroupError(implode('<br>', $result->getErrorMessages()), $couponID);
-					unset($result);
-				}
-				unset($couponID);
-				Internals\DiscountCouponTable::enableCheckCouponsUse();
-				Internals\DiscountCouponTable::updateUseCoupons();
-            } */
-
             $seller = new \Site\SellingCoupons\CouponSeller();
     
             if (!$seller->deleteCoupon($couponId))

@@ -145,9 +145,26 @@ $adminList->DisplayList();
 					couponId: id,
 				}
 			}).then(function (response) {
-				console.log(response);
 			}, function (response) {
-				console.log(response);		
+				let errorText = '<div class="main-grid-message main-grid-message-error">';
+				response.errors.forEach(function(item) {
+					errorText += item.message;
+				});
+				errorText += '</div>';
+
+				let dialog = new BX.CDialog({
+					title: '<?=Loc::getMessage('SITE_COUPON_LIST_COUPON_DELETE_ERR')?>',
+					content: errorText,
+					width: 300,
+					height: 50,
+					draggable: true,
+					resizable: true,
+					buttons: [
+						BX.CDialog.prototype.btnClose,
+					]
+				});
+
+				dialog.Show();
 			});
 		}
 	</script>
