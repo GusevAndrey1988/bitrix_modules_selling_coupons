@@ -12,7 +12,7 @@ class CouponHandler
     {
         $eventResult = new \Bitrix\Main\ORM\EventResult();
 
-        if (\Bitrix\Main\Loader::includeModule('site.selling.coupons'))
+        if (\Bitrix\Main\Loader::includeModule('site.sellingcoupons'))
         {
             $couponId = $event->getParameter('primary')['ID'];
             $coupon = \Bitrix\Sale\Internals\DiscountCouponTable::wakeUpObject($couponId);

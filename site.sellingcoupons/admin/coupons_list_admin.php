@@ -7,9 +7,9 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/bitrix/modules/main/include/prolog_admi
 
 IncludeModuleLangFile(__FILE__);
 
-Loader::includeModule('site.selling.coupons');
+Loader::includeModule('site.sellingcoupons');
 
-$cuponModulePermissions = $APPLICATION->GetGroupRight('site.selling.coupons');
+$cuponModulePermissions = $APPLICATION->GetGroupRight('site.sellingcoupons');
 if ($cuponModulePermissions == 'D')
 {
 	$APPLICATION->AuthForm(Loc::getMessage('SITE_COUPON_ACCESS_DENIED'));
@@ -112,7 +112,6 @@ while ($coupon = $resultList->GetNext())
 {
 	$row = &$adminList->AddRow($coupon['ID'], $coupon);
 	
-	// TODO: Удаление записи о продаже
 	$actions = [
 		[
 			'ICON' => 'edit',
@@ -124,8 +123,7 @@ while ($coupon = $resultList->GetNext())
 			'ICON' => 'delete',
 			'TEXT' => Loc::getMessage('SITE_COUPON_LIST_COUPON_DELETE'),
 			'LINK' => 'javascript:if(confirm(\'' . Loc::getMessage('SITE_COUPON_LIST_COUPON_DELETE_CONFIRM') . '\')) 
-				top.window.location.href=\'/bitrix/admin/sale_discount_coupons.php?lang=' . LANGUAGE_ID
-				. '&ID=' . $coupon['COUPON_ID'] . '&action=delete&sessid=' . bitrix_sessid() . '\'',
+				deleteCoupon(' . $coupon['COUPON_ID'] . ')',
 		]
 	];
 
@@ -138,5 +136,21 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/bitrix/modules/main/include/prolog_admi
 
 $adminList->DisplayFilter($filterFields);
 $adminList->DisplayList();
+
+?>
+	<script>
+		function deleteCoupon(id) {
+			BX.ajax.runAction('site:sellingcoupons.Controller.CouponController.deleteCoupon', {
+				data: {
+					couponId: id,
+				}
+			}).then(function (response) {
+				console.log(response);
+			}, function (response) {
+				console.log(response);		
+			});
+		}
+	</script>
+<?php
 
 require_once($_SERVER['DOCUMENT_ROOT'].'/bitrix/modules/main/include/epilog_admin.php');

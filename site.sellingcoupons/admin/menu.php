@@ -5,7 +5,7 @@ use Bitrix\Main\Localization\Loc;
 
 IncludeModuleLangFile(__FILE__);
 
-if ($APPLICATION->GetGroupRight('site.selling.coupons') >= 'R')
+if ($APPLICATION->GetGroupRight('site.sellingcoupons') >= 'R')
 {
     return [
         'parent_menu' => 'global_menu_store',

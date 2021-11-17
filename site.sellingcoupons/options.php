@@ -4,7 +4,7 @@ use Bitrix\Main\Config;
 use Bitrix\Main\Loader;
     use Bitrix\Main\Localization\Loc;
 
-    $module_id = 'site.selling.coupons';
+    $module_id = 'site.sellingcoupons';
 
     $cuponModulePermissions = $APPLICATION->GetGroupRight($module_id);
     if ($cuponModulePermissions < 'R')

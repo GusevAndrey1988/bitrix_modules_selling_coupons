@@ -6,9 +6,9 @@ use Bitrix\Main\Localization\Loc;
 
 IncludeModuleLangFile(__FILE__);
 
-class site_selling_coupons extends \CModule
+class site_sellingcoupons extends \CModule
 {
-    public $MODULE_ID = 'site.selling.coupons';
+    public $MODULE_ID = 'site.sellingcoupons';
 	public $MODULE_VERSION;
 	public $MODULE_VERSION_DATE;
 	public $MODULE_NAME;
@@ -112,7 +112,7 @@ class site_selling_coupons extends \CModule
         $this->InstallEvents();
         $this->InstallFiles();
 
-        RegisterModule('site.selling.coupons');
+        RegisterModule('site.sellingcoupons');
     }
 
     public function DoUninstall()
@@ -126,6 +126,6 @@ class site_selling_coupons extends \CModule
             $this->UnInstallDB();
         }
         
-        UnRegisterModule('site.selling.coupons');
+        UnRegisterModule('site.sellingcoupons');
     }
 }
