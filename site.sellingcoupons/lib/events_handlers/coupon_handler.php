@@ -16,10 +16,10 @@ class CouponHandler
         {
             $couponId = $event->getParameter('primary')['ID'];
             $coupon = \Bitrix\Sale\Internals\DiscountCouponTable::wakeUpObject($couponId);
-            $coupon->fillActive();
+            $coupon->fill();
 
             $couponSeller = new \Site\SellingCoupons\CouponSeller();
-            if ($couponSeller->couponSold($couponId) && $coupon->getActive())
+            if ($couponSeller->couponSold($couponId))
             {
                 $eventResult->addError(new \Bitrix\Main\ORM\EntityError(
                     Loc::getMessage('SITE_COUPON_EVENTS_COUPON_SOLD')

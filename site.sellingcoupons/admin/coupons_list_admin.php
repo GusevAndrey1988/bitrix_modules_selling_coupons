@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * 
+ * TODO: Групповые действия
+ * 
+ */
+
 use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
 
@@ -42,6 +48,11 @@ $filterFields = [
 		'name' => Loc::getMessage('SITE_COUPON_LIST_COUPON_ACTIVE'),
 		'filterable' => '',
 	],
+	[
+		'id' => 'USE_COUNT',
+		'name' => Loc::getMessage('SITE_COUPON_LIST_COUPON_USE_COUNT'),
+		'filterable' => '',
+	]
 ];
 
 $arFilter = [];
@@ -63,6 +74,7 @@ $couponsList = \Site\SellingCoupons\DataMappers\SoldCouponsTable::getList([
 		'*',
 		'COUPON_CODE' => 'COUPON.COUPON',
 		'COUPON_ACTIVE' => 'COUPON.ACTIVE',
+		'COUPON_USE_COUNT' => 'COUPON.USE_COUNT',
 	],
 	'filter' => $arFilter,
 	'limit' => \CAdminUiResult::GetNavSize($tableId),
@@ -84,25 +96,31 @@ $headers = [
 		'id' => 'ID',
 		'content' => 'ID',
 		'sort' => 'ID',
-		'default' => true
+		'default' => true,
 	],
 	[
 		'id' => 'COUPON_ID',
 		'content' => Loc::getMessage('SITE_COUPON_LIST_COUPON_ID'),
 		'sort' => 'COUPON_ID',
-		'default' => true
+		'default' => true,
 	],
 	[
 		'id' => 'COUPON_CODE',
 		'content' => Loc::getMessage('SITE_COUPON_LIST_COUPON_CODE'),
 		'sort' => 'COUPON_CODE',
-		'default' => true
+		'default' => true,
 	],
 	[
 		'id' => 'COUPON_ACTIVE',
 		'content' => Loc::getMessage('SITE_COUPON_LIST_COUPON_ACTIVE'),
 		'sort' => 'COUPON_ACTIVE',
-		'default' => true
+		'default' => true,
+	],
+	[
+		'id' => 'COUPON_USE_COUNT',
+		'content' => Loc::getMessage('SITE_COUPON_LIST_COUPON_USE_COUNT'),
+		'sort' => 'COUPON_USE_COUNT',
+		'default' => true,
 	],
 ];
 
@@ -145,6 +163,7 @@ $adminList->DisplayList();
 					couponId: id,
 				}
 			}).then(function (response) {
+				window.location = '<?=$APPLICATION->GetCurPage()?>';
 			}, function (response) {
 				let errorText = '<div class="main-grid-message main-grid-message-error">';
 				response.errors.forEach(function(item) {
