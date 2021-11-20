@@ -8,6 +8,7 @@
 
 use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
+use Bitrix\Sale\Internals;
 
 require_once($_SERVER['DOCUMENT_ROOT'].'/bitrix/modules/main/include/prolog_admin_before.php');
 
@@ -68,6 +69,66 @@ if (!isset($order))
 {
 	$order = 'ASC';
 }
+
+/* if ($listId = $adminList->GroupAction())
+{
+	$action = $_REQUEST['action'];
+	if (!empty($_REQUEST['action_button']))
+		$action = $_REQUEST['action_button'];
+
+	if ($_REQUEST['action_target'] == 'selected')
+	{
+		$listId = [];
+		$couponIterator = Internals\DiscountCouponTable::getList([
+			'select' => ['ID', 'DISCOUNT_ID'],
+			'filter' => $filter
+		]);
+		while ($coupon = $couponIterator->fetch())
+		{
+			$listId[] = $coupon['ID'];
+		}
+		unset($coupon, $couponIterator);
+	}
+
+	$listId = array_filter($listId);
+	if (!empty($listId))
+	{
+		switch ($action)
+		{
+			case 'activate':
+			case 'deactivate':
+				Internals\DiscountCouponTable::disableCheckCouponsUse();
+				$fields = [
+					'ACTIVE' => ($action == 'activate' ? 'Y' : 'N')
+				];
+				foreach ($listId as &$couponId)
+				{
+					$result = Internals\DiscountCouponTable::update($couponId, $fields);
+					if (!$result->isSuccess())
+						$adminList->AddGroupError(implode('<br>', $result->getErrorMessages()), $couponId);
+					unset($result);
+				}
+				unset($couponId, $fields);
+				Internals\DiscountCouponTable::enableCheckCouponsUse();
+				break;
+		}
+	}
+	unset($discountList, $action, $listID);
+
+	if ($adminList->hasGroupErrors())
+	{
+		$adminSidePanelHelper->sendJsonErrorResponse($adminList->getGroupErrors());
+	}
+	else
+	{
+		$adminSidePanelHelper->sendSuccessResponse();
+	}
+}
+
+$adminList->AddGroupActionTable([
+	'activate' => Loc::getMessage('MAIN_ADMIN_LIST_ACTIVATE'),
+	'deactivate' => Loc::getMessage('MAIN_ADMIN_LIST_DEACTIVATE')
+]); */
 
 $couponsList = \Site\SellingCoupons\DataMappers\SoldCouponsTable::getList([
 	'select' => [

@@ -9,7 +9,7 @@ if (!Loader::includeModule('sale'))
 }
 
 \Bitrix\Main\Loader::registerAutoLoadClasses('site.sellingcoupons', [
-    '\\Site\\SellingCoupons\\CouponSeller' => 'lib/coupon_seller.php',
+    '\\Site\\SellingCoupons\\SoldCouponManager' => 'lib/sold_coupon_manager.php',
 
     '\\Site\\SellingCoupons\\CustomProperties\\DiscountProperty' => 'lib/custom_properties/discount_property.php',
 

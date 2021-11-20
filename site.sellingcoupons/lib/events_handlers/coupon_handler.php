@@ -15,11 +15,9 @@ class CouponHandler
         if (\Bitrix\Main\Loader::includeModule('site.sellingcoupons'))
         {
             $couponId = $event->getParameter('primary')['ID'];
-            $coupon = \Bitrix\Sale\Internals\DiscountCouponTable::wakeUpObject($couponId);
-            $coupon->fill();
 
-            $couponSeller = new \Site\SellingCoupons\CouponSeller();
-            if ($couponSeller->couponSold($couponId))
+            $soldCouponManager = new \Site\SellingCoupons\SoldCouponManager();
+            if ($soldCouponManager->couponSold($couponId))
             {
                 $eventResult->addError(new \Bitrix\Main\ORM\EntityError(
                     Loc::getMessage('SITE_COUPON_EVENTS_COUPON_SOLD')
