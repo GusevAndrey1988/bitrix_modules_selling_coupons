@@ -19,7 +19,7 @@ class DeleteCouponAction extends \Bitrix\Main\Engine\Action
         {
             $couponManager = new \Site\SellingCoupons\SoldCouponManager();
     
-            if (!$couponManager->deleteCoupon($couponId))
+            if (!$couponManager->deleteSoldCoupons([$couponId]))
             {
                 $this->addError(
                     new \Bitrix\Main\Error(

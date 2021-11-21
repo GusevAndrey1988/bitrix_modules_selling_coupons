@@ -70,7 +70,7 @@ if (!isset($order))
 	$order = 'ASC';
 }
 
-/* if ($listId = $adminList->GroupAction())
+if ($listId = $adminList->GroupAction())
 {
 	$action = $_REQUEST['action'];
 	if (!empty($_REQUEST['action_button']))
@@ -89,6 +89,11 @@ if (!isset($order))
 		}
 		unset($coupon, $couponIterator);
 	}
+
+	$listId = array_column(\Site\SellingCoupons\DataMappers\SoldCouponsTable::getList([
+		'select' => ['COUPON_ID'],
+		'filter' => ['=ID' => $listId]
+	])->fetchAll(), 'COUPON_ID');
 
 	$listId = array_filter($listId);
 	if (!empty($listId))
@@ -111,9 +116,16 @@ if (!isset($order))
 				unset($couponId, $fields);
 				Internals\DiscountCouponTable::enableCheckCouponsUse();
 				break;
+			case 'delete':
+				$couponManager = new \Site\SellingCoupons\SoldCouponManager();
+				if (!$couponManager->deleteSoldCoupons($listId))
+				{
+					$adminList->AddGroupError('<br>' . Loc::getMessage('SITE_COUPON_LIST_COUPON_DELETE_ERR'));
+				}
+				break;
 		}
 	}
-	unset($discountList, $action, $listID);
+	unset($discountList, $action, $listId);
 
 	if ($adminList->hasGroupErrors())
 	{
@@ -126,9 +138,10 @@ if (!isset($order))
 }
 
 $adminList->AddGroupActionTable([
+	'delete' => true,
 	'activate' => Loc::getMessage('MAIN_ADMIN_LIST_ACTIVATE'),
 	'deactivate' => Loc::getMessage('MAIN_ADMIN_LIST_DEACTIVATE')
-]); */
+]);
 
 $couponsList = \Site\SellingCoupons\DataMappers\SoldCouponsTable::getList([
 	'select' => [

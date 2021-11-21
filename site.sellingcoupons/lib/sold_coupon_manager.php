@@ -3,7 +3,7 @@
 namespace Site\SellingCoupons;
 
 use Bitrix\Main\Loader;
-use \Bitrix\Sale\Internals;
+use Bitrix\Sale\Internals;
 use Site\SellingCoupons\DataMappers\SoldCouponsTable;
 
 class SoldCouponManager
@@ -139,64 +139,93 @@ class SoldCouponManager
     }
 
     /**
-     * @param int $couponId
+     * @param int[] $couponsIds
      * 
      * @return bool false если купон активен и ни разу не использован
      */
-    public function deleteCoupon(int $couponId): bool
+    public function deleteSoldCoupons(array $couponsIds): bool
     {
-        $soldCoupon = SoldCouponsTable::getList([
+        $soldCouponCollection = SoldCouponsTable::getList([
             'select' => [
                 'ID',
                 'COUPON',
+                'COUPON_ID'
             ],
             'filter' => [
-                '=COUPON_ID' => $couponId,
+                '=COUPON_ID' => $couponsIds,
             ],
-        ])->fetchObject();
+        ])->fetchCollection();
 
-        if (!$soldCoupon)
+        if (!$soldCouponCollection)
         {
             return true;
         }
 
-        $coupon = $soldCoupon->getCoupon();
-        if ($coupon && $coupon->getActive() && $coupon->getUseCount() == 0)
+        $couponsIds = $soldCouponCollection->getCouponIdList();
+        $couponsCollection = \Bitrix\Sale\Internals\DiscountCouponTable::getList([
+            'select' => [
+                'ID',
+                'ACTIVE',
+                'USE_COUNT',
+                'DISCOUNT_ID',
+            ],
+            'filter' => [
+                '=ID' => $couponsIds,
+            ],
+        ])->fetchCollection();
+    
+        foreach ($couponsCollection as $coupon)
         {
-            return false;
+            if ($coupon && $coupon->getActive() && $coupon->getUseCount() == 0)
+            {
+                return false;
+            }
         }
-
+       
+        Internals\DiscountCouponTable::setDiscountCheckList($couponsCollection->getDiscountIdList());
+        Internals\DiscountCouponTable::disableCheckCouponsUse();
+        
         /** @var \Bitrix\Main\DB\Connection $db */
         $db = \Bitrix\Main\Application::getConnection();
         $db->startTransaction();
         try 
         {
             // Порядок удаления имеет значения (из за обработчика события)
-
-            $result = $soldCoupon->delete();
-            if (!$result->isSuccess())
+            
+            foreach ($soldCouponCollection as $soldCoupon)
             {
-                $db->rollbackTransaction();
-                return false;
-            }
-
-            if ($coupon)
-            {
-                $result = $coupon->delete();
-
+                $result = $soldCoupon->delete();
                 if (!$result->isSuccess())
                 {
                     $db->rollbackTransaction();
                     return false;
                 }
             }
+
+            if ($couponsCollection)
+            {
+                foreach ($couponsCollection as $coupon)
+                {
+                    $result = $coupon->delete();
+                    if (!$result->isSuccess())
+                    {
+                        $db->rollbackTransaction();
+                        return false;
+                    }
+                }
+            }
         }
         catch (\Exception $exception)
         {
             $db->rollbackTransaction();
+            echo $exception->getMessage();
+            return false;
         }
 
         $db->commitTransaction();
+
+        Internals\DiscountCouponTable::enableCheckCouponsUse();
+        Internals\DiscountCouponTable::updateUseCoupons();
 
         return true;
     }
