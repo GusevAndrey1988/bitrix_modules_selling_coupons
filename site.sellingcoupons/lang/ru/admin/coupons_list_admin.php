@@ -4,6 +4,7 @@ $MESS['SITE_COUPON_ACCESS_DENIED'] = 'Доступ запрещён';
 
 $MESS['SITE_COUPON_LIST_COUPON_ID'] = 'ID купона';
 $MESS['SITE_COUPON_LIST_COUPON_CODE'] = 'Код купрона';
+$MESS['SITE_COUPON_LIST_ORDER_ID'] = 'ID заказа';
 $MESS['SITE_COUPON_LIST_COUPON_ACTIVE'] = 'Активность купона';
 $MESS['SITE_COUPON_LIST_COUPON_USE_COUNT'] = 'Число использований';
 

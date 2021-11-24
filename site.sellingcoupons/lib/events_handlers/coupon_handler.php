@@ -8,7 +8,7 @@ IncludeModuleLangFile(__FILE__);
 
 class CouponHandler
 {
-    public function onBeforeDelete(\Bitrix\Main\ORM\Event $event)
+    public function onBeforeDelete(\Bitrix\Main\Event $event)
     {
         $eventResult = new \Bitrix\Main\ORM\EventResult();
 

@@ -85,15 +85,24 @@ class SoldCouponManager
     }
 
     /** 
-     * @param array Список купонов
+     * @param array $couponsList Список купонов
+     * @param int $orderId Id заказа
+     * 
+     * @throws \Bitrix\Main\ArgumentException
      */
-    public function markCouponsAsSold(array $couponsList): array
+    public function markCouponsAsSold(array $couponsList, int $orderId): array
     {
+        if ($orderId <= 0)
+        {
+            throw new \Bitrix\Main\ArgumentException('$orderId <= 0');
+        }
+
         $soldCouponsList = [];
         foreach ($couponsList as $coupon)
         {
             $newSoldCoupon = new \Site\SellingCoupons\DataMappers\SoldCoupon();
             $newSoldCoupon->setCoupon($coupon);
+            $newSoldCoupon->setOrderId($orderId);
             $result = $newSoldCoupon->save();
 
             if (!$result->isSuccess())
@@ -114,7 +123,7 @@ class SoldCouponManager
      * @throws \Bitrix\Main\ArgumentException
      * @throws \Bitrix\Main\LoaderException
      */
-    public function createAndMarkCoupons(int $discountId, int $couponCount = 1): array
+    public function createAndMarkCoupons(int $discountId, int $orderId, int $couponCount = 1): array
     {
         $connection = \Bitrix\Main\Application::getConnection();
         $soldCouponsList = [];
@@ -125,7 +134,7 @@ class SoldCouponManager
         try
         {
             $couponsList = $this->createCoupons($discountId, $couponCount);
-            $soldCouponsList = $this->markCouponsAsSold($couponsList);
+            $soldCouponsList = $this->markCouponsAsSold($couponsList, $orderId);
         }
         catch (\Exception $exception)
         {

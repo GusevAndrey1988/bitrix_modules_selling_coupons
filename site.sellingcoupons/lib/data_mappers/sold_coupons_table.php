@@ -25,6 +25,8 @@ class SoldCouponsTable extends \Bitrix\Main\ORM\Data\DataManager
 
     public static function getMap()
     {
+        // TODO: field verify
+        
         return [
             (new IntegerField('ID'))
                 ->configurePrimary()
@@ -33,6 +35,9 @@ class SoldCouponsTable extends \Bitrix\Main\ORM\Data\DataManager
             (new IntegerField('COUPON_ID'))
                 ->configureNullable(false)
                 ->configureUnique(),
+
+            (new IntegerField('ORDER_ID'))
+                ->configureNullable(false),
 
             (new Reference(
                 'COUPON',

@@ -45,6 +45,11 @@ $filterFields = [
 		'filterable' => '',
 	],
 	[
+		'id' => 'ORDER_ID',
+		'name' => Loc::getMessage('SITE_COUPON_LIST_ORDER_ID'),
+		'filterable' => '',
+	],
+	[
 		'id' => 'COUPON_ACTIVE',
 		'name' => Loc::getMessage('SITE_COUPON_LIST_COUPON_ACTIVE'),
 		'filterable' => '',
@@ -182,6 +187,12 @@ $headers = [
 		'id' => 'COUPON_CODE',
 		'content' => Loc::getMessage('SITE_COUPON_LIST_COUPON_CODE'),
 		'sort' => 'COUPON_CODE',
+		'default' => true,
+	],
+	[
+		'id' => 'ORDER_ID',
+		'content' => Loc::getMessage('SITE_COUPON_LIST_ORDER_ID'),
+		'sort' => 'ORDER_ID',
 		'default' => true,
 	],
 	[

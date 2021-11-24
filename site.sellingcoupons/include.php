@@ -18,6 +18,8 @@ if (!Loader::includeModule('sale'))
     '\\Site\\SellingCoupons\\DataMappers\\SoldCouponCollection' => 'lib/data_mappers/sold_coupon_collection.php',
 
     '\\Site\\SellingCoupons\\EventsHandlers\\CouponHandler' => 'lib/events_handlers/coupon_handler.php',
+    '\\Site\\SellingCoupons\\EventsHandlers\\OrderHandler' => 'lib/events_handlers/order_handler.php',
+    '\\Site\\SellingCoupons\\EventsHandlers\\BasketHandler' => 'lib/events_handlers/basket_handler.php',
 
     '\\Site\\SellingCoupons\\Controller\\CouponController' => 'lib/controller/coupon_controller.php',
 
