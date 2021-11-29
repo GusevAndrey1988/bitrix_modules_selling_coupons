@@ -48,6 +48,14 @@ class site_sellingcoupons extends \CModule
             \Site\SellingCoupons\EventsHandlers\CouponHandler::class,
             'onBeforeDelete'
         );
+
+        $eventManager->registerEventHandler(
+            'sale',
+            'OnSaleOrderPaid',
+            $this->MODULE_ID,
+            \Site\SellingCoupons\EventsHandlers\OrderHandler::class,
+            'onSaleOrderPaid'
+        );
     }
 
     public function UnInstallEvents()
@@ -55,11 +63,11 @@ class site_sellingcoupons extends \CModule
         $eventManager = \Bitrix\Main\EventManager::getInstance();
 
         $eventManager->unRegisterEventHandler(
-            'iblock',
-            'OnIBlockPropertyBuildList',
+            'sale',
+            'OnSaleOrderPaid',
             $this->MODULE_ID,
-            \Site\SellingCoupons\CustomProperties\DiscountProperty::class,
-            'GetUserTypeDescription'
+            \Site\SellingCoupons\EventsHandlers\OrderHandler::class,
+            'onSaleOrderPaid'
         );
 
         $eventManager->unRegisterEventHandler(
@@ -68,6 +76,14 @@ class site_sellingcoupons extends \CModule
             $this->MODULE_ID,
             \Site\SellingCoupons\EventsHandlers\CouponHandler::class,
             'onBeforeDelete'
+        );
+
+        $eventManager->unRegisterEventHandler(
+            'iblock',
+            'OnIBlockPropertyBuildList',
+            $this->MODULE_ID,
+            \Site\SellingCoupons\CustomProperties\DiscountProperty::class,
+            'GetUserTypeDescription'
         );
     }
 

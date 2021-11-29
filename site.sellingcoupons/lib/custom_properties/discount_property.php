@@ -10,7 +10,7 @@ IncludeModuleLangFile(__FILE__);
 class DiscountProperty
 {
 
-    public function GetUserTypeDescription()
+    public static function GetUserTypeDescription()
     {
         return [
               'PROPERTY_TYPE' => 'N',
@@ -20,7 +20,7 @@ class DiscountProperty
           ];
     }
 
-    public function GetPropertyFieldHtml($arProperty, $value, $strHTMLControlName)
+    public static function GetPropertyFieldHtml($arProperty, $value, $strHTMLControlName)
     {
         Loader::includeModule('sale');
 
