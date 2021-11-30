@@ -86,6 +86,16 @@ use Bitrix\Main\Loader;
         {
             \CAdminMessage::ShowMessage(Loc::getMessage('SITE_COUPON_CONFIG_IBLOCK_NOTSET'));
         }
+
+        $mailEventName = $request->get('mail-event-name');
+        if ($mailEventName)
+        {
+            Config\Option::set($module_id, 'mail_event_name', $mailEventName);
+        }
+        else
+        {
+            \CAdminMessage::ShowMessage(Loc::getMessage('SITE_COUPON_CONFIG_MAIL_EVENT_NOTSET'));
+        }
     }
 
     $tabs = [
@@ -134,6 +144,28 @@ use Bitrix\Main\Loader;
                         id="iblock-discount-property" value="<?=Config\Option::get($module_id, 'property_code')?>">       
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <label for="mail-event-name">
+                        <?=Loc::getMessage('SITE_COUPON_CONFIG_MAIL_EVENT')?>
+                    </label>   
+                </td>
+                <td>
+                    <input type="text" name="mail-event-name" 
+                        id="mail-event-name" value="<?=Config\Option::get($module_id, 'mail_event_name')?>">       
+                </td>
+            </tr>
+            <!-- <tr>
+                <td>
+                    <label for="site-id">
+                        <?=Loc::getMessage('SITE_COUPON_CONFIG_SITE_ID')?>
+                    </label>   
+                </td>
+                <td>
+                    <input type="text" name="site-id" 
+                        id="site-id" value="<?=Config\Option::get($module_id, 'site_id')?>">       
+                </td>
+            </tr> -->
         </tbody>
 
         <?php

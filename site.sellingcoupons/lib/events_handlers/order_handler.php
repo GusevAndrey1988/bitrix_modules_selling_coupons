@@ -2,12 +2,15 @@
 
 namespace Site\SellingCoupons\EventsHandlers;
 
+use Bitrix\Main\Config;
+
 class OrderHandler
 {
     private const MODULE_ID = 'site.sellingcoupons';
 
     private const OPTION_PROPERTY_CODE = 'property_code';
     private const OPTION_IBLOCK_ID = 'iblock_id';
+    private const OPTION_MAIL_EVENT_NAME = 'mail_event_name';
 
     public static function onSaleOrderPaid(\Bitrix\Main\Event $event)
     {
@@ -22,11 +25,7 @@ class OrderHandler
         /** @var \Bitrix\Sale\Basket $basket */
         $basket = $order->getBasket();
 
-        $productList = [];
-        if ($order->isPaid())
-        {
-           $productList = self::getProductsList($basket);
-        }
+        $productList = self::getProductsList($basket);
 
         if (!$productList)
         {
@@ -35,15 +34,73 @@ class OrderHandler
 
         $couponsList = self::getCouponsList(array_column($productList, 'ID'));
 
-        $soldCouopnsList = self::createCoupons(
-            $couponsList,
-            $order->getId(),
-            $productList
-        );
+        if ($order->isPaid())
+        {
+            $soldCouopnsList = self::createCoupons(
+                $couponsList,
+                $order->getId(),
+                $productList
+            );
+    
+            $user = \CUser::GetById($order->getUserId())->Fetch();
+    
+            self::sendMessage($soldCouopnsList,
+                $order->getSiteId(),
+                $user['LAST_NAME'] . ' ' . $user['NAME'],
+                $user['EMAIL']
+            );
+        }
+        else
+        {
+            $soldCouponsList = \Site\SellingCoupons\DataMappers\SoldCouponsTable::getList([
+                'select' => [
+                    'COUPON_ID',
+                ],
 
-        // TODO: отправка сообщения с кодами купонов
-        // TODO: реализация отмены заказа
+                'filter' => [
+                    '=ORDER_ID' => $order->getId(),
+                ],
+            ])->fetchAll();
+
+            \Bitrix\Sale\Internals\DiscountCouponTable::disableCheckCouponsUse();
+            foreach ($soldCouponsList as $coupon)
+            {
+                \Bitrix\Sale\Internals\DiscountCouponTable::update(
+                    $coupon['COUPON_ID'],
+                    [
+                        'ACTIVE' => 'N',
+                    ]
+                );
+            }
+            \Bitrix\Sale\Internals\DiscountCouponTable::enableCheckCouponsUse();
+
+            $soldCouponManger = new \Site\SellingCoupons\SoldCouponManager();
+            $soldCouponManger->deleteSoldCoupons(array_column($soldCouponsList, 'COUPON_ID'));
+        }
+        
         // TODO: обработка ошибок
+    }
+
+    /** 
+     * Отправляет сообщение с приобретёнными купонами
+     */
+    public static function sendMessage(array $soldCouopnsList, string $siteId, string $fullName, string $email)
+    {
+        $codesList = [];
+        foreach ($soldCouopnsList as $coupon)
+        {
+            $codesList[] = $coupon->getCoupon()->getCoupon();
+        }
+
+        \Bitrix\Main\Mail\Event::sendImmediate([
+            'EVENT_NAME' => Config\Option::get(self::MODULE_ID, self::OPTION_MAIL_EVENT_NAME),
+            'LID' => $siteId,
+            'C_FIELDS' => [
+                'USER_EMAIL' => $email,
+                'USER_NAME' => $fullName,
+                'COUPONS' => implode(', ', $codesList),
+            ]
+        ]);
     }
 
     private static function getProductsList(\Bitrix\Sale\Basket $basket): array
