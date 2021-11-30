@@ -155,17 +155,6 @@ use Bitrix\Main\Loader;
                         id="mail-event-name" value="<?=Config\Option::get($module_id, 'mail_event_name')?>">       
                 </td>
             </tr>
-            <!-- <tr>
-                <td>
-                    <label for="site-id">
-                        <?=Loc::getMessage('SITE_COUPON_CONFIG_SITE_ID')?>
-                    </label>   
-                </td>
-                <td>
-                    <input type="text" name="site-id" 
-                        id="site-id" value="<?=Config\Option::get($module_id, 'site_id')?>">       
-                </td>
-            </tr> -->
         </tbody>
 
         <?php
