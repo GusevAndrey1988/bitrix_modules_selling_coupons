@@ -17,23 +17,21 @@ Loc::loadMessages(__FILE__);
 class SoldCouponManager
 {
     /**
-     * Проверка продажи купона
+     * Проверка продажи купонов
      * 
-     * @param int $couponId Id купона
+     * @param array $couponsIds Список идентификаторов купонов
      * 
-     * @return bool true - если купон продан, false - в противном случае
+     * @return bool true - если хотя бы один купон из списка продан, false - в противном случае
      * 
      * @throws \Bitrix\Main\ArgumentException
      */
-    public function couponSold(int $couponId): bool
+    public function couponsSold(array $couponsIds): bool
     {
-        $this->validateId($couponId);
-
         $soldCoupon = SoldCouponsTable::getList([
             'filter' => [
-                '=COUPON_ID' => $couponId,
+                '=COUPON_ID' => $couponsIds,
             ],
-        ])->fetchObject();
+        ])->fetchAll();
 
         if ($soldCoupon)
         {
@@ -145,7 +143,7 @@ class SoldCouponManager
     /**
      * Создаёт купоны и помечает их как проданные
      * 
-     * @param int $basketRuleId Id правила корзины
+     * @param int $basketRuleId Id правило корзины
      * @param int $orderId Id Заказа
      * @param int $couponCount Количество купонов
      * 
@@ -212,14 +210,13 @@ class SoldCouponManager
                 'DISCOUNT_ID',
             ],
             'filter' => [
-                '=ID' => $couponsIds,
+                '=ID' => $soldCouponCollection->getCouponIdList(),
             ],
         ])->fetchCollection();
     
         foreach ($couponsCollection as $coupon)
         {
-            // TODO: if ($this->couponsSold($couponsIds))
-            if ($coupon && $coupon->getActive() && $coupon->getUseCount() == 0)
+            if ($coupon->getActive() && $coupon->getUseCount() == 0)
             {
                 return false;
             }
@@ -244,17 +241,14 @@ class SoldCouponManager
                     return false;
                 }
             }
-
-            if ($couponsCollection)
+            
+            foreach ($couponsCollection as $coupon)
             {
-                foreach ($couponsCollection as $coupon)
+                $result = $coupon->delete();
+                if (!$result->isSuccess())
                 {
-                    $result = $coupon->delete();
-                    if (!$result->isSuccess())
-                    {
-                        $db->rollbackTransaction();
-                        return false;
-                    }
+                    $db->rollbackTransaction();
+                    return false;
                 }
             }
         }

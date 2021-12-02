@@ -17,7 +17,7 @@ class CouponHandler
             $couponId = $event->getParameter('primary')['ID'];
 
             $soldCouponManager = new \Site\SellingCoupons\SoldCouponManager();
-            if ($soldCouponManager->couponSold($couponId))
+            if ($soldCouponManager->couponsSold([$couponId]))
             {
                 $eventResult->addError(new \Bitrix\Main\ORM\EntityError(
                     Loc::getMessage('SITE_COUPON_EVENTS_COUPON_SOLD')
