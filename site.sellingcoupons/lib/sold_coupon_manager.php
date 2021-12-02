@@ -1,20 +1,34 @@
 <?php
 
+// TODO: обработка ошибок
+
 namespace Site\SellingCoupons;
 
 use Bitrix\Main\Loader;
+use Bitrix\Main\Localization\Loc;
 use Bitrix\Sale\Internals;
 use Site\SellingCoupons\DataMappers\SoldCouponsTable;
 
+Loc::loadMessages(__FILE__);
+
+/**
+ * Менеджер для работы с проданными купонами
+ */
 class SoldCouponManager
 {
     /**
-     * @param int $couponId
+     * Проверка продажи купона
      * 
-     * @return bool
+     * @param int $couponId Id купона
+     * 
+     * @return bool true - если купон продан, false - в противном случае
+     * 
+     * @throws \Bitrix\Main\ArgumentException
      */
     public function couponSold(int $couponId): bool
     {
+        $this->validateId($couponId);
+
         $soldCoupon = SoldCouponsTable::getList([
             'filter' => [
                 '=COUPON_ID' => $couponId,
@@ -30,48 +44,44 @@ class SoldCouponManager
     }
     
     /**
-     * @param int $discountId
-     * @param int $couponCount
+     * Создаёт купоны
      * 
-     * @return array Список купонов
+     * @param int $basketRuleId Id правила работы с корзиной
+     * @param int $couponCount Количество купонов
      * 
      * @throws \Bitrix\Main\ArgumentException
      * @throws \Bitrix\Main\LoaderException
+     * 
+     * @return object[] Список купонов
      */
-    public function createCoupons(int $discountId, int $couponCount = 1): array
+    public function createCoupons(int $basketRuleId, int $couponCount = 1): array
     {
+        $this->validateId($basketRuleId);
+        $this->validateCount($couponCount);
+
+        if ($couponCount === 0)
+        {
+            return [];
+        }
+
         if (!Loader::includeModule('sale'))
         {
-            throw new \Bitrix\Main\LoaderException('load module error "sale"');
+            throw new \Bitrix\Main\LoaderException(
+                Loc::getMessage('SITE_COUPON_MANAGER_MODULE_SALE_EXCEPTION'));
         }
 
-        if ($discountId <= 0) 
-        {
-            throw new \Bitrix\Main\ArgumentException('$discountId <= 0');
-        }
-
-        if ($couponCount <= 0) 
-        {
-            throw new \Bitrix\Main\ArgumentException('$couponCount <= 0');
-        }
-
-        Internals\DiscountCouponTable::setDiscountCheckList([$discountId]);
+        Internals\DiscountCouponTable::setDiscountCheckList([$basketRuleId]);
         Internals\DiscountCouponTable::disableCheckCouponsUse();
 
-        $couponClassName = Internals\DiscountCouponTable::getObjectClass();
-
         $couponsList = [];
+        $couponCreationError = '';
         for ($counter = 0; $counter < $couponCount; $counter++)
         {
-            $newCoupon = new $couponClassName();
-            $newCoupon->setDiscountId($discountId);
-            $newCoupon->setCoupon(Internals\DiscountCouponTable::generateCoupon(true));
-            $newCoupon->setType(Internals\DiscountCouponTable::TYPE_ONE_ORDER);
+            $newCoupon = $this->createCouponObject($basketRuleId);
             $result = $newCoupon->save();
-
             if (!$result->isSuccess())
             {
-                // TODO: exception
+                $couponCreationError = implode('\n', $result->getErrorMessages());
                 break;
             }
 
@@ -81,10 +91,21 @@ class SoldCouponManager
         Internals\DiscountCouponTable::enableCheckCouponsUse();
         Internals\DiscountCouponTable::updateUseCoupons();
 
+        if ($couponCreationError !== '')
+        {
+            throw new \Bitrix\Main\ObjectException(
+                Loc::getMessage('SITE_COUPON_MANAGER_COUPON_CREATION_EXCEPTION')
+                    . '\n'
+                    . $couponCreationError
+            );
+        }
+
         return $couponsList;
     }
 
     /** 
+     * Помечает купон как проданный
+     * 
      * @param array $couponsList Список купонов
      * @param int $orderId Id заказа
      * 
@@ -92,38 +113,48 @@ class SoldCouponManager
      */
     public function markCouponsAsSold(array $couponsList, int $orderId): array
     {
-        if ($orderId <= 0)
-        {
-            throw new \Bitrix\Main\ArgumentException('$orderId <= 0');
-        }
+        $this->validateId($orderId);
 
         $soldCouponsList = [];
+        $soldCouponCreationErrors = '';
         foreach ($couponsList as $coupon)
         {
-            $newSoldCoupon = new \Site\SellingCoupons\DataMappers\SoldCoupon();
-            $newSoldCoupon->setCoupon($coupon);
-            $newSoldCoupon->setOrderId($orderId);
+            $newSoldCoupon = $this->createSoldCouponObject($coupon, $orderId);
             $result = $newSoldCoupon->save();
-
             if (!$result->isSuccess())
             {
-                // TODO: exception
+                $soldCouponCreationErrors = implode('\n', $result->getErrorMessages());
                 break;
             }
 
             $soldCouponsList[] = $newSoldCoupon;
         }
 
+        if ($soldCouponCreationErrors !== '')
+        {
+            throw new \Bitrix\Main\ObjectException(
+                Loc::getMessage('SITE_COUPON_MANAGER_COUPON_CREATION_EXCEPTION')
+                    . '\n'
+                    . $soldCouponCreationErrors
+            );
+        }
+
         return $soldCouponsList;
     }
 
     /**
-     * @return \Site\SellingCoupons\DataMappers\SoldCoupon[]
+     * Создаёт купоны и помечает их как проданные
+     * 
+     * @param int $basketRuleId Id правила корзины
+     * @param int $orderId Id Заказа
+     * @param int $couponCount Количество купонов
+     * 
+     * @return \Site\SellingCoupons\DataMappers\SoldCoupon[] Массив купонов
      * 
      * @throws \Bitrix\Main\ArgumentException
      * @throws \Bitrix\Main\LoaderException
      */
-    public function createAndMarkCoupons(int $discountId, int $orderId, int $couponCount = 1): array
+    public function createAndMarkCoupons(int $basketRuleId, int $orderId, int $couponCount = 1): array
     {
         $connection = \Bitrix\Main\Application::getConnection();
         $soldCouponsList = [];
@@ -133,7 +164,7 @@ class SoldCouponManager
 
         try
         {
-            $couponsList = $this->createCoupons($discountId, $couponCount);
+            $couponsList = $this->createCoupons($basketRuleId, $couponCount);
             $soldCouponsList = $this->markCouponsAsSold($couponsList, $orderId);
         }
         catch (\Exception $exception)
@@ -148,9 +179,11 @@ class SoldCouponManager
     }
 
     /**
-     * @param int[] $couponsIds
+     * Удаляет купоны
      * 
-     * @return bool false если купон активен и ни разу не использован
+     * @param int[] $couponsIds Массив идентификаторов купонов
+     * 
+     * @return bool false если купон продан и не использован
      */
     public function deleteSoldCoupons(array $couponsIds): bool
     {
@@ -185,6 +218,7 @@ class SoldCouponManager
     
         foreach ($couponsCollection as $coupon)
         {
+            // TODO: if ($this->couponsSold($couponsIds))
             if ($coupon && $coupon->getActive() && $coupon->getUseCount() == 0)
             {
                 return false;
@@ -199,7 +233,7 @@ class SoldCouponManager
         $db->startTransaction();
         try 
         {
-            // Порядок удаления имеет значения (из за обработчика события)
+            // Порядок удаления имеет значения (из-за обработчика события)
             
             foreach ($soldCouponCollection as $soldCoupon)
             {
@@ -227,7 +261,6 @@ class SoldCouponManager
         catch (\Exception $exception)
         {
             $db->rollbackTransaction();
-            echo $exception->getMessage();
             return false;
         }
 
@@ -237,5 +270,63 @@ class SoldCouponManager
         Internals\DiscountCouponTable::updateUseCoupons();
 
         return true;
+    }
+
+    private function createSoldCouponObject(object $coupon, int $orderId)
+        : \Site\SellingCoupons\DataMappers\SoldCoupon
+    {
+        $newSoldCoupon = new \Site\SellingCoupons\DataMappers\SoldCoupon();
+        $newSoldCoupon->setCoupon($coupon);
+        $newSoldCoupon->setOrderId($orderId);
+
+        return $newSoldCoupon;
+    }
+
+    private function createCouponObject(int $basketRuleId): object
+    {
+        $couponClassName = Internals\DiscountCouponTable::getObjectClass();
+
+        $newCoupon = new $couponClassName();
+        $newCoupon->setDiscountId($basketRuleId);
+        $newCoupon->setCoupon(Internals\DiscountCouponTable::generateCoupon(true));
+        $newCoupon->setType(Internals\DiscountCouponTable::TYPE_ONE_ORDER);
+
+        return $newCoupon;
+    }
+
+    /**
+     * @throws \Bitrix\Main\ArgumentException
+     */
+    private function validateId(int $id)
+    {
+        if ($id <= 0)
+        {
+            throw new \Bitrix\Main\ArgumentException(
+                Loc::getMessage(
+                    'SITE_COUPON_MANAGER_ARGUMENT_EXCEPTION',
+                    [
+                        '#ID#' => $id,
+                    ]
+                )
+            );
+        }
+    }
+
+    /**
+     * @throws \Bitrix\Main\ArgumentException
+     */
+    private function validateCount(int $count)
+    {
+        if ($count < 0) 
+        {
+            throw new \Bitrix\Main\ArgumentException(
+                Loc::getMessage(
+                    'SITE_COUPON_MANAGER_CNT_EXCEPTION',
+                    [
+                        '#CNT#' => $count,
+                    ]
+                )
+            );
+        }
     }
 }

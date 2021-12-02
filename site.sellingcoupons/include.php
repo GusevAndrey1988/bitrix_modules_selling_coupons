@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Автозагрузка классов и загрузка необходимых модулей
+ */
+
 use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
 
@@ -7,6 +11,8 @@ if (!Loader::includeModule('sale'))
 {
     $APPLICATION->ThrowException(Loc::getMessage('SITE_COUPON_SALE_MODULE_ERROR'));
 }
+
+$PREFIX = '\\Site\\SellingCoupons\\';
 
 \Bitrix\Main\Loader::registerAutoLoadClasses('site.sellingcoupons', [
     '\\Site\\SellingCoupons\\SoldCouponManager' => 'lib/sold_coupon_manager.php',
@@ -19,7 +25,6 @@ if (!Loader::includeModule('sale'))
 
     '\\Site\\SellingCoupons\\EventsHandlers\\CouponHandler' => 'lib/events_handlers/coupon_handler.php',
     '\\Site\\SellingCoupons\\EventsHandlers\\OrderHandler' => 'lib/events_handlers/order_handler.php',
-    '\\Site\\SellingCoupons\\EventsHandlers\\BasketHandler' => 'lib/events_handlers/basket_handler.php',
 
     '\\Site\\SellingCoupons\\Controller\\CouponController' => 'lib/controller/coupon_controller.php',
 

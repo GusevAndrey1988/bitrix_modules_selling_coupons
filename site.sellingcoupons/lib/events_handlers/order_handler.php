@@ -164,8 +164,8 @@ class OrderHandler
         $soldCouopnsList = [];
         foreach ($couponsList as $coupon)
         {
-            $soldCouopnsList += $soldCouponsManager->createAndMarkCoupons(
-                $coupon[$iblockPropertyValue], $orderId, $productList[$coupon['ID']]['QUANTITY']);
+            $soldCouopnsList = array_merge($soldCouopnsList, $soldCouponsManager->createAndMarkCoupons(
+                $coupon[$iblockPropertyValue], $orderId, $productList[$coupon['ID']]['QUANTITY']));
         }
 
         return $soldCouopnsList;
