@@ -266,6 +266,36 @@ class SoldCouponManager
         return true;
     }
 
+    /**
+     * Меняет активность купонов
+     * 
+     * @return string[] Сообщения об ошибках
+     */
+    public function changeActivity(array $couponIdList, bool $active): array
+    {
+        Internals\DiscountCouponTable::disableCheckCouponsUse();
+
+        foreach ($couponIdList as &$couponId)
+        {
+            $result = Internals\DiscountCouponTable::update(
+                $couponId, 
+                [
+                    'ACTIVE' => ($active ? 'Y' : 'N')
+                ]
+            );
+
+            if (!$result->isSuccess())
+            {
+                Internals\DiscountCouponTable::enableCheckCouponsUse();
+                return $result->getErrorMessages();
+            }
+        }
+
+        Internals\DiscountCouponTable::enableCheckCouponsUse();
+
+        return [];
+    }
+
     private function createSoldCouponObject(object $coupon, int $orderId)
         : \Site\SellingCoupons\DataMappers\SoldCoupon
     {

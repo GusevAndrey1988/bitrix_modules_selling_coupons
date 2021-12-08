@@ -1,20 +1,21 @@
 <?php
 
-/**
- * 
- * TODO: Групповые действия
- * 
- */
-
 use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Sale\Internals;
 
 require_once($_SERVER['DOCUMENT_ROOT'].'/bitrix/modules/main/include/prolog_admin_before.php');
 
-IncludeModuleLangFile(__FILE__);
+Loc::loadMessages(__FILE__);
 
 Loader::includeModule('site.sellingcoupons');
+
+/** @global \CAdminPage $adminPage */
+global $adminPage;
+
+/** @global \CAdminSidePanelHelper $adminSidePanelHelper */
+global $adminSidePanelHelper;
+
 
 $cuponModulePermissions = $APPLICATION->GetGroupRight('site.sellingcoupons');
 if ($cuponModulePermissions == 'D')
@@ -107,19 +108,15 @@ if ($listId = $adminList->GroupAction())
 		{
 			case 'activate':
 			case 'deactivate':
-				Internals\DiscountCouponTable::disableCheckCouponsUse();
-				$fields = [
-					'ACTIVE' => ($action == 'activate' ? 'Y' : 'N')
-				];
-				foreach ($listId as &$couponId)
+				// TODO: не работает
+				$couponManager = new \Site\SellingCoupons\SoldCouponManager();
+				$errorMessages = $couponManager->changeActivity($listId, $action == 'activate');
+				if ($errorMessages)
 				{
-					$result = Internals\DiscountCouponTable::update($couponId, $fields);
-					if (!$result->isSuccess())
-						$adminList->AddGroupError(implode('<br>', $result->getErrorMessages()), $couponId);
-					unset($result);
+					$adminList->AddGroupError(implode('<br>', $errorMessages));
 				}
-				unset($couponId, $fields);
-				Internals\DiscountCouponTable::enableCheckCouponsUse();
+				unset($couponManager);
+				unset($errorMessages);
 				break;
 			case 'delete':
 				$couponManager = new \Site\SellingCoupons\SoldCouponManager();
@@ -130,7 +127,7 @@ if ($listId = $adminList->GroupAction())
 				break;
 		}
 	}
-	unset($discountList, $action, $listId);
+	unset($action, $listId);
 
 	if ($adminList->hasGroupErrors())
 	{
@@ -164,7 +161,6 @@ $couponsList = \Site\SellingCoupons\DataMappers\SoldCouponsTable::getList([
 
 $resultList = new \CAdminUiResult($couponsList, $tableId);
 
-/** @global \CAdminPage $adminPage */
 $selfFolderUrl = $adminPage->getSelfFolderUrl();
 
 $resultList->NavStart();
