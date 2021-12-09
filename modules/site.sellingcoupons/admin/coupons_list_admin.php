@@ -219,6 +219,16 @@ while ($coupon = $resultList->GetNext())
 			'DEFAULT' => true
 		],
 		[
+			'ICON' => 'activate',
+			'TEXT' => Loc::getMessage('SITE_COUPON_LIST_COUPON_ACTIVATE'),
+			'LINK' => 'javascript:changeActivityCoupon(' . $coupon['COUPON_ID'] . ', true)',
+		],
+		[
+			'ICON' => 'deactivate',
+			'TEXT' => Loc::getMessage('SITE_COUPON_LIST_COUPON_DEACTIVATE'),
+			'LINK' => 'javascript:changeActivityCoupon(' . $coupon['COUPON_ID'] . ', false)',
+		],
+		[
 			'ICON' => 'delete',
 			'TEXT' => Loc::getMessage('SITE_COUPON_LIST_COUPON_DELETE'),
 			'LINK' => 'javascript:if(confirm(\'' . Loc::getMessage('SITE_COUPON_LIST_COUPON_DELETE_CONFIRM') . '\')) 
@@ -238,6 +248,47 @@ $adminList->DisplayList();
 
 ?>
 	<script>
+		function showErrorDialog(response) {
+			let errorText = '<div class="main-grid-message main-grid-message-error">';
+			response.errors.forEach(function(item) {
+				errorText += item.message;
+			});
+			errorText += '</div>';
+
+			let dialog = new BX.CDialog({
+				title: '<?=Loc::getMessage('SITE_COUPON_LIST_COUPON_ERR')?>',
+				content: errorText,
+				width: 300,
+				height: 50,
+				draggable: true,
+				resizable: true,
+				buttons: [
+					BX.CDialog.prototype.btnClose,
+				]
+			});
+
+			dialog.Show();
+		}
+
+		function changeActivityCoupon(id, active) {
+			let action = 'site:sellingcoupons.Controller.CouponController.';
+			if (active === true) {
+				action += 'activateCoupon';
+			} else {
+				action += 'deactivateCoupon';
+			}
+
+			BX.ajax.runAction(action, {
+				data: {
+					couponId: id,
+				}
+			}).then(function (response) {
+				window.location = '<?=$APPLICATION->GetCurPage()?>';
+			}, function (response) {
+				showErrorDialog(response);
+			});
+		}
+
 		function deleteCoupon(id) {
 			BX.ajax.runAction('site:sellingcoupons.Controller.CouponController.deleteCoupon', {
 				data: {
@@ -246,25 +297,7 @@ $adminList->DisplayList();
 			}).then(function (response) {
 				window.location = '<?=$APPLICATION->GetCurPage()?>';
 			}, function (response) {
-				let errorText = '<div class="main-grid-message main-grid-message-error">';
-				response.errors.forEach(function(item) {
-					errorText += item.message;
-				});
-				errorText += '</div>';
-
-				let dialog = new BX.CDialog({
-					title: '<?=Loc::getMessage('SITE_COUPON_LIST_COUPON_DELETE_ERR')?>',
-					content: errorText,
-					width: 300,
-					height: 50,
-					draggable: true,
-					resizable: true,
-					buttons: [
-						BX.CDialog.prototype.btnClose,
-					]
-				});
-
-				dialog.Show();
+				showErrorDialog(response);
 			});
 		}
 	</script>

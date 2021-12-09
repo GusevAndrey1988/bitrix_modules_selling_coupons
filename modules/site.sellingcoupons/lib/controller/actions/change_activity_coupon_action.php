@@ -6,7 +6,7 @@ use Bitrix\Main\Localization\Loc;
 
 Loc::loadMessages(__FILE__);
 
-class ChangeActivityCouponActionBase extends \Bitrix\Main\Engine\Action
+abstract class ChangeActivityCouponActionBase extends \Bitrix\Main\Engine\Action
 {
     protected function changeActivity(int $couponId, bool $active)
     {

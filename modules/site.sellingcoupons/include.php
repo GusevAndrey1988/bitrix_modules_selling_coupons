@@ -29,4 +29,7 @@ $PREFIX = '\\Site\\SellingCoupons\\';
     '\\Site\\SellingCoupons\\Controller\\CouponController' => 'lib/controller/coupon_controller.php',
 
     '\\Site\\SellingCoupons\\Controller\\Actions\\DeleteCouponAction' => 'lib/controller/actions/delete_coupon_action.php',
+    '\\Site\\SellingCoupons\\Controller\\Actions\\ChangeActivityCouponActionBase' => 'lib/controller/actions/change_activity_coupon_action.php',
+    '\\Site\\SellingCoupons\\Controller\\Actions\\ActivateCouponAction' => 'lib/controller/actions/activate_coupon_action.php',
+    '\\Site\\SellingCoupons\\Controller\\Actions\\DeactivateCouponAction' => 'lib/controller/actions/deactivate_coupon_action.php',
 ]);

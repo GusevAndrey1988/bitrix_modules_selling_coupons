@@ -11,14 +11,30 @@ class CouponController extends \Bitrix\Main\Engine\Controller
         return [
             'deleteCoupon' => [
                 'class' => Actions\DeleteCouponAction::class,
-                'class' => Actions\ActivateCouponAction::class,
-                'class' => Actions\DeactivateCouponAction::class,
-
                 'prefilters' => [
                     new ActionFilter\Authentication(),
                     new ActionFilter\Csrf(),
+                ],       
+                'configure' => [
                 ],
-                
+            ],
+
+            'activateCoupon' => [
+                'class' => Actions\ActivateCouponAction::class,
+                'prefilters' => [
+                    new ActionFilter\Authentication(),
+                    new ActionFilter\Csrf(),
+                ],       
+                'configure' => [
+                ],
+            ],
+
+            'deactivateCoupon' => [
+                'class' => Actions\DeactivateCouponAction::class,
+                'prefilters' => [
+                    new ActionFilter\Authentication(),
+                    new ActionFilter\Csrf(),
+                ],       
                 'configure' => [
                 ],
             ],
